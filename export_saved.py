@@ -11,6 +11,7 @@ import argparse
 import csv
 import logging
 import sys
+import datetime
 
 import praw
 
@@ -27,6 +28,7 @@ class Converter():
         self._file = file
         self._html_file = html_file if html_file is not None else 'chrome-bookmarks.html'
         self._folder_name = folder_name if folder_name is not None else 'Reddit'
+        logging.setLevel(logging.INFO)
 
     def parse_urls(self):
         """Parse the file and returns a folder ordered list."""
@@ -213,10 +215,24 @@ def get_csv_rows(reddit, seq):
         except ValueError:
             created = 0
 
+        createdreadable = datetime.datetime.fromtimestamp(int(created)).strftime('%Y-%m-%d %H:%M:%S')
+            
         try:
             folder = str(i.subreddit).encode('utf-8').decode('utf-8')
         except AttributeError:
             folder = "None"
+
+        try:
+            body = "N/A"
+            body = str(i.body).encode('utf-8').decode('utf-8')
+        except AttributeError:
+            body = "N/A"
+
+        try:
+            author = "N/A"
+            author = str(i.author).encode('utf-8').decode('utf-8')
+        except AttributeError:
+            author = "N/A"
 
         if callable(i.permalink):
             permalink = i.permalink()
@@ -224,7 +240,7 @@ def get_csv_rows(reddit, seq):
             permalink = i.permalink
         permalink = permalink.encode('utf-8').decode('utf-8')
 
-        csv_rows.append([reddit_url + permalink, title, created, None, folder])
+        csv_rows.append([reddit_url + permalink, title, created, createdreadable, body, author, None, folder])
 
     return csv_rows
 
@@ -239,7 +255,7 @@ def write_csv(csv_rows, file_name=None):
     file_name = file_name if file_name is not None else 'export-saved.csv'
 
     # csv setting
-    csv_fields = ['URL', 'Title', 'Created', 'Selection', 'Folder']
+    csv_fields = ['URL', 'Submission Title', 'Created-UNIX', 'Created-Standard', 'Body', 'Username', 'Selection', 'Folder']
     delimiter = ','
 
     # write csv using csv module
@@ -307,6 +323,8 @@ def save_submissions(reddit):
 
 def main():
     """main func."""
+    logging.getLogger().setLevel(logging.INFO)
+    
     args = get_args(sys.argv[1:])
 
     # set logging config
