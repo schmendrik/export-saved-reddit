@@ -105,6 +105,9 @@ def get_args(argv):
     parser.add_argument("-V", "--version",
                         help="get program version.",
                         action="store_true")
+    parser.add_argument("-convert", "--convert",
+                        help="convert csv to html",
+                        action="store_true")
 
     args = parser.parse_args(argv)
     return args
@@ -275,7 +278,14 @@ def write_csv(csv_rows, file_name=None):
                     csvwriter.writerow([r.encode('utf-8', 'ignore')
                                         if isinstance(r, str) else r for r in row])
 
+def convert():
+    """Convert csv to html."""
 
+    converter = Converter("export-saved.csv", "export-saved.html",
+                          "Reddit - Submissions")
+    converter.convert()
+    logging.info('html written.')
+                    
 def process(reddit, seq, file_name, folder_name):
     """Write csv and html from a list of results.
 
@@ -294,7 +304,6 @@ def process(reddit, seq, file_name, folder_name):
                           folder_name=folder_name)
     converter.convert()
     logging.info('html written.')
-
 
 def save_upvoted(reddit):
     """ save upvoted posts """
@@ -343,6 +352,8 @@ def main():
         save_saved(reddit)
         save_submissions(reddit)
         save_comments(reddit)
+    elif args.convert:
+        convert()
     else:
         save_saved(reddit)
 
