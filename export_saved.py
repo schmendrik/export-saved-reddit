@@ -28,7 +28,6 @@ class Converter():
         self._file = file
         self._html_file = html_file if html_file is not None else 'chrome-bookmarks.html'
         self._folder_name = folder_name if folder_name is not None else 'Reddit'
-        logging.setLevel(logging.INFO)
 
     def parse_urls(self):
         """Parse the file and returns a folder ordered list."""
